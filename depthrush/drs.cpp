@@ -210,6 +210,7 @@ void fire_touches(drs_touch_t* events, size_t event_count) {
 }
 
 VRFoot foot;
+unsigned long counters[] = {0,0,0,0,0,0,0,0,0,0};
 
 void start_kinect() {
 
@@ -230,16 +231,33 @@ void start_kinect() {
 
 				// update event details ghosting simulator
 				foot.event.id = foot.id;
-				foot.event.x = (rand() / (double)RAND_MAX) * (1 - 0) + 0;
-				foot.event.y = (rand() / (double)RAND_MAX) * (1 - 0) + 0;
-				foot.event.width = (rand() / (double)RAND_MAX) * (0.1 - 0) + 0;
+				foot.event.x = 0.5;
+				foot.event.y = 0.5;
+				foot.event.width = 1;
 				foot.event.height = foot.event.width;
 
-
-				foot.event.type = DRS_DOWN;
-				fire_touches(&foot.event, 1);
-				foot.event.type = DRS_UP;
-				fire_touches(&foot.event, 1);
+				if (GetKeyState(VK_SHIFT) & 0x8000)
+				{
+					counters[0] = 0; // holding down
+					counters[1]++;
+					
+					if (counters[1] == 1) {
+						foot.event.type = DRS_DOWN;
+						fire_touches(&foot.event, 1);
+					}
+					else if (counters[1] > 1) {
+						foot.event.type = DRS_MOVE;
+						fire_touches(&foot.event, 1);
+					}
+				}
+				else {
+					counters[0]++; // released
+					counters[1] == 0;
+					foot.event.type = DRS_UP;
+					if (counters[0] == 1) fire_touches(&foot.event, 1); // send up event very shortly
+				}
+				
+				
 				
 				// slow down
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
