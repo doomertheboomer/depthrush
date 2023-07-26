@@ -228,17 +228,19 @@ void start_kinect() {
 				foot.id = 0;
 				foot.index = 0;
 
-				// update event details
+				// update event details ghosting simulator
 				foot.event.id = foot.id;
-				foot.event.x = 1;
-				foot.event.y = 1;
-				foot.event.width = -1.79769E+308;
+				foot.event.x = (rand() / (double)RAND_MAX) * (1 - 0) + 0;
+				foot.event.y = (rand() / (double)RAND_MAX) * (1 - 0) + 0;
+				foot.event.width = (rand() / (double)RAND_MAX) * (0.1 - 0) + 0;
 				foot.event.height = foot.event.width;
+
+
 				foot.event.type = DRS_DOWN;
-
 				fire_touches(&foot.event, 1);
-				puts("touch fired!!!");
-
+				foot.event.type = DRS_UP;
+				fire_touches(&foot.event, 1);
+				
 				// slow down
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			}
