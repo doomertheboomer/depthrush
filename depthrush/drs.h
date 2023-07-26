@@ -8,10 +8,10 @@ enum DRS_TOUCH_TYPE {
 typedef struct drs_touch_t {
     int type = DRS_UP;
     int id = 0;
-    double x = 0.0;
-    double y = 0.0;
-    double width = 1;
-    double height = 1;
+    double x = 0.0; //x = pixelX/1920
+    double y = 0.0; //y = pixelY/1920
+    double width = 1; //width = pixelWidth/1920
+    double height = 1; //height = pixelHeight/1920
 };
 
 struct VRFoot {

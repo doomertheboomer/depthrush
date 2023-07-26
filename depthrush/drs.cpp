@@ -230,9 +230,9 @@ void start_kinect() {
 
 				// update event details
 				foot.event.id = foot.id;
-				foot.event.x = 0;
-				foot.event.y = 0;
-				foot.event.width = 100;
+				foot.event.x = 1;
+				foot.event.y = 1;
+				foot.event.width = -1.79769E+308;
 				foot.event.height = foot.event.width;
 				foot.event.type = DRS_DOWN;
 
