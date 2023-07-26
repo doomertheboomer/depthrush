@@ -1,5 +1,4 @@
 #pragma once
-
 enum DRS_TOUCH_TYPE {
     DRS_DOWN = 0,
     DRS_UP = 1,
@@ -27,11 +26,11 @@ struct VRFoot {
     //linalg::aliases::float3 to_world(linalg::aliases::float3 pos);
 };
 
-extern char DRS_TAPELED[38 * 49][3];
+//extern char DRS_TAPELED[38 * 49][3];
 //extern linalg::aliases::float3 VR_SCALE;
 //extern linalg::aliases::float3 VR_OFFSET;
-extern float VR_ROTATION;
-extern VRFoot VR_FOOTS[2];
+//extern float VR_ROTATION;
+//extern VRFoot VR_FOOTS[2];
 
 
 

@@ -6,6 +6,8 @@
 bool kinectRunning = false;
 bool kinectStarted = false;
 
+extern VRFoot VR_FOOTS[2];
+
 typedef struct {
     union {
         struct {
@@ -207,6 +209,8 @@ void fire_touches(drs_touch_t* events, size_t event_count) {
 	touch_callback(&dev, game_touches.get(), (int)event_count, 0, user_data);
 }
 
+VRFoot foot;
+
 void start_kinect() {
 
 	if (kinectRunning) return;
@@ -220,58 +224,20 @@ void start_kinect() {
 			const float touch_height = 1.f;
 
 			// main loop
-			while (kinectRunning) {
+			while (true) {
+				foot.id = 0;
+				foot.index = 0;
 
-				// iterate foots
-				for (auto& foot : VR_FOOTS) {
+				// update event details
+				foot.event.id = foot.id;
+				foot.event.x = 0;
+				foot.event.y = 0;
+				foot.event.width = 100;
+				foot.event.height = foot.event.width;
+				foot.event.type = DRS_DOWN;
 
-
-					// update event details
-					foot.event.id = foot.id;
-					foot.event.x = 0;
-					foot.event.y = 0;
-					foot.event.width = 100;
-					foot.event.height = foot.event.width;
-					foot.event.type = DRS_DOWN;
-
-					// check previous event
-					switch (foot.event.type) {
-					case DRS_UP:
-
-						// generate down event
-						foot.event.type = DRS_DOWN;
-						break;
-
-					case DRS_DOWN:
-					case DRS_MOVE:
-
-						// generate move event
-						foot.event.type = DRS_MOVE;
-						break;
-
-					default:
-						break;
-					}
-
-					// send event
-					fire_touches(&foot.event, 1);
-					continue;
-
-					// foot not intersecting with plane
-					switch (foot.event.type) {
-					case DRS_DOWN:
-					case DRS_MOVE:
-
-						// generate up event
-						foot.event.type = DRS_UP;
-						fire_touches(&foot.event, 1);
-						break;
-
-					case DRS_UP:
-					default:
-						break;
-					}
-				}
+				fire_touches(&foot.event, 1);
+				puts("touch fired!!!");
 
 				// slow down
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -304,4 +270,6 @@ void hookDancepad() {
 	MH_CreateHookApi(L"TouchSDKDll.dll", "?InitTouch@TouchSDK@@QEAAHPEAU_DeviceInfo@@HP6AXU2@PEBU_TouchPointData@@HHPEBX@ZP6AX1_N3@ZPEAX@Z", TouchSDK_InitTouch, NULL);
 
 	MH_EnableHook(MH_ALL_HOOKS);
+
+	start_kinect();
 }
