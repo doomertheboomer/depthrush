@@ -142,6 +142,69 @@ namespace drs {
 		return 1;
 	}
 
+	inline DWORD scale_double_to_xy(double val) {
+		return static_cast<DWORD>(val * 32768);
+	}
+
+	inline DWORD scale_double_to_height(double val) {
+		return static_cast<DWORD>(val * 1312);
+	}
+
+	inline DWORD scale_double_to_width(double val) {
+		return static_cast<DWORD>(val * 1696);
+	}
+
+	void fire_touches(drs_touch_t* events, size_t event_count) {
+
+		// check callback first
+		if (!touch_callback) {
+			return;
+		}
+
+		// generate touch data
+		auto game_touches = std::make_unique<touch_data_t[]>(event_count);
+		for (size_t i = 0; i < event_count; i++) {
+
+			// initialize touch value
+			game_touches[i].cid = (DWORD)events[i].id;
+			game_touches[i].unk8 = 0;
+
+			// copy scaled values
+			game_touches[i].x = scale_double_to_xy(events[i].x);
+			game_touches[i].y = scale_double_to_xy(events[i].y);
+			game_touches[i].width = scale_double_to_width(events[i].width);
+			game_touches[i].height = scale_double_to_height(events[i].height);
+
+			// decide touch type
+			switch (events[i].type) {
+			case DRS_DOWN:
+				game_touches[i].type = TS_DOWN;
+				break;
+			case DRS_UP:
+				game_touches[i].type = TS_UP;
+				break;
+			case DRS_MOVE:
+				game_touches[i].type = TS_MOVE;
+				break;
+			default:
+				break;
+			}
+		}
+
+		// build device information
+		dev_info_t dev;
+		dev.unk1 = 0;
+		dev.unk2 = 0;
+		dev.device_id = 0;
+		dev.vid = 0xDEAD;
+		dev.pid = 0xBEEF;
+		dev.pvn = 0xC0DE;
+		dev.max_point_num = 16;
+
+		// fire callback
+		touch_callback(&dev, game_touches.get(), (int)event_count, 0, user_data);
+	}
+
 	void hookDancepad() {
 		MH_Initialize();
 		MH_CreateHookApi(L"TouchSDKDll.dll", "??0TouchSDK@@QEAA@XZ", TouchSDK_Constructor, NULL);

@@ -36,7 +36,7 @@ namespace drs {
     extern float VR_ROTATION;
     extern VRFoot VR_FOOTS[2];
 
-    //void fire_touches(drs_touch_t* events, size_t event_count);
+    void fire_touches(drs_touch_t* events, size_t event_count);
     //void start_vr();
 
     void hookDancepad();
