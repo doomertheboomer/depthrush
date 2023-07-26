@@ -1,5 +1,4 @@
 #include "includes.h"
-#include "drs.h"
 
 static uintptr_t imageBase;
 
@@ -45,7 +44,7 @@ BOOL WINAPI DllMain(HMODULE hMod, DWORD dwReason, LPVOID lpReserved)
 	case DLL_PROCESS_ATTACH:
 		DisableThreadLibraryCalls(hMod);
 		imageBase = (uintptr_t)GetModuleHandleA(0);
-		drs::hookDancepad();
+		hookDancepad();
 
 		break;
 	}
