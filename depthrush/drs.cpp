@@ -209,8 +209,9 @@ void fire_touches(drs_touch_t* events, size_t event_count) {
 	touch_callback(&dev, game_touches.get(), (int)event_count, 0, user_data);
 }
 
-VRFoot foot;
-unsigned long counters[] = {0,0,0,0,0,0,0,0,0,0};
+VRFoot feet[11];
+unsigned long holdcounters[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+unsigned long releasecounters[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 void start_kinect() {
 
@@ -220,45 +221,331 @@ void start_kinect() {
 		std::thread t([] {
 			puts("starting kinect thread");
 
-			// dance floor plane
-			const float touch_width = 1.f;
-			const float touch_height = 1.f;
-
 			// main loop
 			while (true) {
-				foot.id = 0;
-				foot.index = 0;
-
-				// update event details ghosting simulator
-				foot.event.id = foot.id;
-				foot.event.x = 0.5;
-				foot.event.y = 0.5;
-				foot.event.width = 1;
-				foot.event.height = foot.event.width;
+				
 
 				if (GetKeyState(VK_SHIFT) & 0x8000)
 				{
-					counters[0] = 0; // holding down
-					counters[1]++;
+					feet[0].id = 0;
+					feet[0].index = 0;
+
+					// update event details
+					feet[0].event.id = feet[0].id;
+					feet[0].event.x = 0.5;
+					feet[0].event.y = 0.5;
+					feet[0].event.width = 1;
+					feet[0].event.height = feet[0].event.width;
+					holdcounters[0] = 0; // holding down
+					releasecounters[0]++;
 					
-					if (counters[1] == 1) {
-						foot.event.type = DRS_DOWN;
-						fire_touches(&foot.event, 1);
+					if (releasecounters[0] == 1) {
+						feet[0].event.type = DRS_DOWN;
+						fire_touches(&feet[0].event, 1);
 					}
-					else if (counters[1] > 1) {
-						foot.event.type = DRS_MOVE;
-						fire_touches(&foot.event, 1);
+					else if (releasecounters[0] > 1) {
+						feet[0].event.type = DRS_MOVE;
+						fire_touches(&feet[0].event, 1);
 					}
 				}
 				else {
-					counters[0]++; // released
-					counters[1] == 0;
-					foot.event.type = DRS_UP;
-					if (counters[0] == 1) fire_touches(&foot.event, 1); // send up event very shortly
+					holdcounters[0]++; // released
+					releasecounters[0] == 0;
+					feet[0].event.type = DRS_UP;
+					if (holdcounters[0] == 1) fire_touches(&feet[0].event, 1); // send up event very shortly
 				}
 				
-				
-				
+				if (GetKeyState(0x31) & 0x8000)
+				{
+					feet[1].id = 1;
+					feet[1].index = 1;
+
+					// update event details
+					feet[1].event.id = feet[1].id;
+					feet[1].event.x = 0.05;
+					feet[1].event.y = 0.5;
+					feet[1].event.width = 0.1;
+					feet[1].event.height = feet[1].event.width;
+					holdcounters[1] = 0; // holding down
+					releasecounters[1]++;
+
+					if (releasecounters[1] == 1) {
+						feet[1].event.type = DRS_DOWN;
+						fire_touches(&feet[1].event, 1);
+					}
+					else if (releasecounters[1] > 1) {
+						feet[1].event.type = DRS_MOVE;
+						fire_touches(&feet[1].event, 1);
+					}
+				}
+				else {
+					holdcounters[1]++; // released
+					releasecounters[1] == 0;
+					feet[1].event.type = DRS_UP;
+					if (holdcounters[1] == 1) fire_touches(&feet[1].event, 1); // send up event very shortly
+				}
+				if (GetKeyState(0x32) & 0x8000)
+				{
+					feet[2].id = 2;
+					feet[2].index = 2;
+
+					// update event details
+					feet[2].event.id = feet[2].id;
+					feet[2].event.x = 0.15;
+					feet[2].event.y = 0.5;
+					feet[2].event.width = 0.1;
+					feet[2].event.height = feet[2].event.width;
+					holdcounters[2] = 0; // holding down
+					releasecounters[2]++;
+
+					if (releasecounters[2] == 1) {
+						feet[2].event.type = DRS_DOWN;
+						fire_touches(&feet[2].event, 1);
+					}
+					else if (releasecounters[2] > 1) {
+						feet[2].event.type = DRS_MOVE;
+						fire_touches(&feet[2].event, 1);
+					}
+				}
+				else {
+					holdcounters[2]++; // released
+					releasecounters[2] == 0;
+					feet[2].event.type = DRS_UP;
+					if (holdcounters[2] == 1) fire_touches(&feet[2].event, 1); // send up event very shortly
+				}
+				if (GetKeyState(0x33) & 0x8000)
+				{
+					feet[3].id = 3;
+					feet[3].index = 3;
+
+					// update event details
+					feet[3].event.id = feet[3].id;
+					feet[3].event.x = 0.25;
+					feet[3].event.y = 0.5;
+					feet[3].event.width = 0.1;
+					feet[3].event.height = feet[3].event.width;
+					holdcounters[3] = 0; // holding down
+					releasecounters[3]++;
+
+					if (releasecounters[3] == 1) {
+						feet[3].event.type = DRS_DOWN;
+						fire_touches(&feet[3].event, 1);
+					}
+					else if (releasecounters[3] > 1) {
+						feet[3].event.type = DRS_MOVE;
+						fire_touches(&feet[3].event, 1);
+					}
+				}
+				else {
+					holdcounters[3]++; // released
+					releasecounters[3] == 0;
+					feet[3].event.type = DRS_UP;
+					if (holdcounters[3] == 1) fire_touches(&feet[3].event, 1); // send up event very shortly
+				}
+				if (GetKeyState(0x34) & 0x8000)
+				{
+					feet[4].id = 4;
+					feet[4].index = 4;
+
+					// update event details
+					feet[4].event.id = feet[4].id;
+					feet[4].event.x = 0.35;
+					feet[4].event.y = 0.5;
+					feet[4].event.width = 0.1;
+					feet[4].event.height = feet[4].event.width;
+					holdcounters[4] = 0; // holding down
+					releasecounters[4]++;
+
+					if (releasecounters[4] == 1) {
+						feet[4].event.type = DRS_DOWN;
+						fire_touches(&feet[4].event, 1);
+					}
+					else if (releasecounters[4] > 1) {
+						feet[4].event.type = DRS_MOVE;
+						fire_touches(&feet[4].event, 1);
+					}
+				}
+				else {
+					holdcounters[4]++; // released
+					releasecounters[4] == 0;
+					feet[4].event.type = DRS_UP;
+					if (holdcounters[4] == 1) fire_touches(&feet[4].event, 1); // send up event very shortly
+				}
+				if (GetKeyState(0x35) & 0x8000)
+				{
+					feet[5].id = 5;
+					feet[5].index = 5;
+
+					// update event details
+					feet[5].event.id = feet[5].id;
+					feet[5].event.x = 0.45;
+					feet[5].event.y = 0.5;
+					feet[5].event.width = 0.1;
+					feet[5].event.height = feet[5].event.width;
+					holdcounters[5] = 0; // holding down
+					releasecounters[5]++;
+
+					if (releasecounters[5] == 1) {
+						feet[5].event.type = DRS_DOWN;
+						fire_touches(&feet[5].event, 1);
+					}
+					else if (releasecounters[5] > 1) {
+						feet[5].event.type = DRS_MOVE;
+						fire_touches(&feet[5].event, 1);
+					}
+				}
+				else {
+					holdcounters[5]++; // released
+					releasecounters[5] == 0;
+					feet[5].event.type = DRS_UP;
+					if (holdcounters[5] == 1) fire_touches(&feet[5].event, 1); // send up event very shortly
+				}
+				if (GetKeyState(0x36) & 0x8000)
+				{
+					feet[6].id = 6;
+					feet[6].index = 6;
+
+					// update event details
+					feet[6].event.id = feet[6].id;
+					feet[6].event.x = 0.55;
+					feet[6].event.y = 0.5;
+					feet[6].event.width = 0.1;
+					feet[6].event.height = feet[6].event.width;
+					holdcounters[6] = 0; // holding down
+					releasecounters[6]++;
+
+					if (releasecounters[6] == 1) {
+						feet[6].event.type = DRS_DOWN;
+						fire_touches(&feet[6].event, 1);
+					}
+					else if (releasecounters[6] > 1) {
+						feet[6].event.type = DRS_MOVE;
+						fire_touches(&feet[6].event, 1);
+					}
+				}
+				else {
+					holdcounters[6]++; // released
+					releasecounters[6] == 0;
+					feet[6].event.type = DRS_UP;
+					if (holdcounters[6] == 1) fire_touches(&feet[6].event, 1); // send up event very shortly
+				}
+				if (GetKeyState(0x37) & 0x8000)
+				{
+					feet[7].id = 7;
+					feet[7].index = 7;
+
+					// update event details
+					feet[7].event.id = feet[7].id;
+					feet[7].event.x = 0.65;
+					feet[7].event.y = 0.5;
+					feet[7].event.width = 0.1;
+					feet[7].event.height = feet[7].event.width;
+					holdcounters[7] = 0; // holding down
+					releasecounters[7]++;
+
+					if (releasecounters[7] == 1) {
+						feet[7].event.type = DRS_DOWN;
+						fire_touches(&feet[7].event, 1);
+					}
+					else if (releasecounters[7] > 1) {
+						feet[7].event.type = DRS_MOVE;
+						fire_touches(&feet[7].event, 1);
+					}
+				}
+				else {
+					holdcounters[7]++; // released
+					releasecounters[7] == 0;
+					feet[7].event.type = DRS_UP;
+					if (holdcounters[7] == 1) fire_touches(&feet[7].event, 1); // send up event very shortly
+				}
+				if (GetKeyState(0x38) & 0x8000)
+				{
+					feet[8].id = 8;
+					feet[8].index = 8;
+
+					// update event details
+					feet[8].event.id = feet[8].id;
+					feet[8].event.x = 0.75;
+					feet[8].event.y = 0.5;
+					feet[8].event.width = 0.1;
+					feet[8].event.height = feet[8].event.width;
+					holdcounters[8] = 0; // holding down
+					releasecounters[8]++;
+
+					if (releasecounters[8] == 1) {
+						feet[8].event.type = DRS_DOWN;
+						fire_touches(&feet[8].event, 1);
+					}
+					else if (releasecounters[8] > 1) {
+						feet[8].event.type = DRS_MOVE;
+						fire_touches(&feet[8].event, 1);
+					}
+				}
+				else {
+					holdcounters[8]++; // released
+					releasecounters[8] == 0;
+					feet[8].event.type = DRS_UP;
+					if (holdcounters[8] == 1) fire_touches(&feet[8].event, 1); // send up event very shortly
+				}
+				if (GetKeyState(0x39) & 0x8000)
+				{
+					feet[9].id = 9;
+					feet[9].index = 9;
+
+					// update event details
+					feet[9].event.id = feet[9].id;
+					feet[9].event.x = 0.85;
+					feet[9].event.y = 0.5;
+					feet[9].event.width = 0.1;
+					feet[9].event.height = feet[9].event.width;
+					holdcounters[9] = 0; // holding down
+					releasecounters[9]++;
+
+					if (releasecounters[9] == 1) {
+						feet[9].event.type = DRS_DOWN;
+						fire_touches(&feet[9].event, 1);
+					}
+					else if (releasecounters[9] > 1) {
+						feet[9].event.type = DRS_MOVE;
+						fire_touches(&feet[9].event, 1);
+					}
+				}
+				else {
+					holdcounters[9]++; // released
+					releasecounters[9] == 0;
+					feet[9].event.type = DRS_UP;
+					if (holdcounters[9] == 1) fire_touches(&feet[9].event, 1); // send up event very shortly
+				}
+				if (GetKeyState(0x30) & 0x8000)
+				{
+					feet[10].id = 10;
+					feet[10].index = 10;
+
+					// update event details
+					feet[10].event.id = feet[10].id;
+					feet[10].event.x = 0.95;
+					feet[10].event.y = 0.5;
+					feet[10].event.width = 0.1;
+					feet[10].event.height = feet[10].event.width;
+					holdcounters[10] = 0; // holding down
+					releasecounters[10]++;
+
+					if (releasecounters[10] == 1) {
+						feet[10].event.type = DRS_DOWN;
+						fire_touches(&feet[10].event, 1);
+					}
+					else if (releasecounters[10] > 1) {
+						feet[10].event.type = DRS_MOVE;
+						fire_touches(&feet[10].event, 1);
+					}
+				}
+				else {
+					holdcounters[10]++; // released
+					releasecounters[10] == 0;
+					feet[10].event.type = DRS_UP;
+					if (holdcounters[10] == 1) fire_touches(&feet[10].event, 1); // send up event very shortly
+				}
+
 				// slow down
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			}
