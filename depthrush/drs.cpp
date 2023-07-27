@@ -230,6 +230,7 @@ void pollKinect() {
 
 		// main loop to read and process skeleton data
 		NUI_SKELETON_FRAME skeletonFrame = { 0 };
+		float errorMargin = 0.02;
 		while (true) {
 			// get the latest skeleton frame
 			hr = NuiSkeletonGetNextFrame(0, &skeletonFrame);
@@ -252,6 +253,22 @@ void pollKinect() {
 					feet[1].event.y = 0.5;
 					feet[2].event.x = rightLegPos.x;
 					feet[2].event.y = 0.5;
+
+					// check for stepping
+					if (leftLegPos.y > (rightLegPos.y + errorMargin)) {
+						feet[2].touching = true;
+						feet[1].touching = false;
+
+					}
+					else if (rightLegPos.y > (leftLegPos.y + errorMargin)) {
+						feet[1].touching = true;
+						feet[2].touching = false;
+					}
+					else {
+						feet[1].touching = true;
+						feet[2].touching = true;
+					}
+
 				}
 			}
 		}
