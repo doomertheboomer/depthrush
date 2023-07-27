@@ -4,6 +4,7 @@
 #include <libloaderapi.h>
 #include <winnt.h>
 #include <iostream>
+#include <NuiApi.h>
 #include "kiero/kiero.h"
 #include "kiero/minhook/include/MinHook.h"
 #include "kiero/injector/injector.hpp"

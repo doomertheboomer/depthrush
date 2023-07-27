@@ -27,6 +27,4 @@ struct VRFoot {
 
 void fire_touches(drs_touch_t* events, size_t event_count);
 
-void start_kinect();
-
 void hookDancepad();

@@ -159,43 +159,6 @@ inline DWORD scale_double_to_width(double val) {
 	return static_cast<DWORD>(val * 1696);
 }
 
-DWORD depthrushWritePort(HANDLE port, char data[], unsigned length)
-{
-	DWORD numWritten = 0;
-
-	OVERLAPPED ol = { 0, 0, 0, 0, NULL };
-	ol.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-
-	BOOL status = WriteFile(port, data, length, &numWritten, &ol);
-	DWORD xferBytes = 0;
-
-	if (!status)
-	{
-		switch (GetLastError())
-		{
-		case ERROR_SUCCESS:
-			break;
-		case ERROR_IO_PENDING:
-			// Wait for 16ms
-			if (WaitForSingleObject(ol.hEvent, 16) == WAIT_OBJECT_0)
-			{
-				status = GetOverlappedResult(port, &ol, &xferBytes, FALSE);
-			}
-			else
-			{
-				CancelIo(port);
-			}
-			break;
-		}
-	}
-
-	CloseHandle(ol.hEvent);
-
-	FlushFileBuffers(port);
-	return numWritten;
-}
-
-
 void fire_touches(drs_touch_t* events, size_t event_count) {
 
 	// check callback first
@@ -247,180 +210,228 @@ void fire_touches(drs_touch_t* events, size_t event_count) {
 	touch_callback(&dev, game_touches.get(), (int)event_count, 0, user_data);
 }
 
-DWORD depthrushTouchThread(HANDLE port)
-{
-	char fileBuf[32];
-	puts("starting serial touch thread");
+void pollKinect() {
+	std::thread t([] {
+		// initialize Kinect
+		HRESULT hr = NuiInitialize(NUI_INITIALIZE_FLAG_USES_SKELETON);
+		if (FAILED(hr)) {
+			std::cout << "Failed to initialize Kinect." << std::endl;
+			return 1;
+		}
 
-	DWORD times = 0;
+		// open the skeleton stream
+		HANDLE skeletonStream = nullptr;
+		hr = NuiSkeletonTrackingEnable(nullptr, 0);
+		if (FAILED(hr)) {
+			std::cout << "Failed to open the skeleton stream." << std::endl;
+			NuiShutdown();
+			return 1;
+		}
 
-	for (;;)
-	{
-		DWORD bytesRead = 0;
-		memset(fileBuf, 0, 32);
+		// main loop to read and process skeleton data
+		NUI_SKELETON_FRAME skeletonFrame = { 0 };
+		while (true) {
+			// get the latest skeleton frame
+			hr = NuiSkeletonGetNextFrame(0, &skeletonFrame);
+			if (FAILED(hr)) {
+				continue;
+			}
 
-		OVERLAPPED ol = { 0, 0, 0, 0, NULL };
-		BOOL ret = 0;
-		ol.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+			// Process each tracked skeleton
+			for (int i = 0; i < NUI_SKELETON_COUNT; ++i) {
+				if (skeletonFrame.SkeletonData[i].eTrackingState == NUI_SKELETON_TRACKED) {
+					// get the position of both legs
+					Vector4 leftLegPos = skeletonFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_ANKLE_LEFT];
+					Vector4 rightLegPos = skeletonFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_ANKLE_RIGHT];
 
-		BOOL rfResult = ReadFile(port, fileBuf, 32, &bytesRead, &ol);
-		DWORD xferBytes = 0;
+					// print the coordinates of both legs
+					std::cout << "Left Leg: X = " << leftLegPos.x << ", Y = " << leftLegPos.y << ", Z = " << leftLegPos.z << std::endl;
+					std::cout << "Right Leg: X = " << rightLegPos.x << ", Y = " << rightLegPos.y << ", Z = " << rightLegPos.z << std::endl;
 
-		if (!rfResult)
-		{
-			switch (GetLastError())
-			{
-			case ERROR_SUCCESS:
-				break;
-			case ERROR_IO_PENDING:
-				// Wait for 16ms
-				if (WaitForSingleObject(ol.hEvent, 16) == WAIT_OBJECT_0)
-				{
-					rfResult = GetOverlappedResult(port, &ol, &xferBytes, FALSE);
+					feet[1].event.x = leftLegPos.x;
+					feet[1].event.y = 0.5;
+					feet[2].event.x = rightLegPos.x;
+					feet[2].event.y = 0.5;
 				}
-				else
-				{
-					CancelIo(port);
-				}
-				break;
 			}
 		}
 
-		CloseHandle(ol.hEvent);
-
-		if (xferBytes > 0)
-		{
-			printf("IN: xferred %d bytes\n", xferBytes);
-		}
-
-		if (bytesRead > 0)
-		{
-			printf("Read %d bytes: ", bytesRead);
-			for (unsigned x = 0; x < bytesRead; x++)
-			{
-				printf("%02X ", fileBuf[x]);
-			}
-			printf("\n");
-
-			BOOL packetRecognised = FALSE;
-
-			if (!packetRecognised)
-			{
-				puts("unknown packet, responding with OK");
-				depthrushWritePort(port, (char*)"1", 1);
-			}
-		}
-		Sleep(16);
-	}
+		// Clean up and exit
+		NuiSkeletonTrackingDisable();
+		NuiShutdown();
+		return 0;
+		});
+	t.detach();
 }
 
-DWORD depthrushNamedPipeServer(LPVOID _)
-{
-	puts("init depthrush pipe server");
+void startInputSpam() {
 
-	HANDLE pipe = CreateNamedPipeW(
-		L"\\\\.\\pipe\\depthrush-api",
-		PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
-		PIPE_TYPE_BYTE | PIPE_WAIT,
-		PIPE_UNLIMITED_INSTANCES,
-		255,
-		255,
-		25,
-		NULL
-	);
+	std::thread t([] {
+		puts("starting kinect thread");
 
-	if (!pipe)
-	{
-		puts("named pipe creation failed!");
-		return 1;
-	}
+		// temporarily hardcode both kinect feet to touching at size 0.1
+		feet[1].touching = true;
 
-	BOOL connected = ConnectNamedPipe(pipe, NULL) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
+		feet[2].touching = true;
 
-	if (connected)
-	{
-	puts("client connection established, spawning thread");
+		// main loop
+		while (true) {
+			// debug shift control to touch entire pad
+			if (GetKeyState(VK_SHIFT) & 0x8000)
+			{
+				// hardcode debug foot details
+				feet[0].id = 0;
+				feet[0].index = 0;
 
-	DWORD tid = 0;
-	CreateThread(NULL, 0, depthrushTouchThread, pipe, 0, &tid);
-	printf("thread spawned, tid=%d\n", tid);
-	}
+				// update event details
+				feet[0].event.id = feet[0].id;
+				feet[0].event.x = 0.5;
+				feet[0].event.y = 0.5;
+				feet[0].event.width = 1;
+				feet[0].event.height = feet[0].event.width;
 
-	return 0;
-}
+				// check previous event
+				switch (feet[0].event.type) {
+				case DRS_UP:
 
-void start_kinect() {
+					// generate down event
+					feet[0].event.type = DRS_DOWN;
+					break;
 
-	if (kinectRunning) return;
-	if (!kinectStarted) {
-		kinectStarted = true;
-		std::thread t([] {
-			puts("starting kinect thread");
+				case DRS_DOWN:
+				case DRS_MOVE:
 
-			// main loop
-			while (true) {
-				
+					// generate move event
+					feet[0].event.type = DRS_MOVE;
+					break;
 
-				if (GetKeyState(VK_SHIFT) & 0x8000)
-				{
-					feet[0].id = 0;
-					feet[0].index = 0;
+				default:
+					break;
+				}
 
-					// update event details
-					feet[0].event.id = feet[0].id;
-					feet[0].event.x = 0.5;
-					feet[0].event.y = 0.5;
-					feet[0].event.width = 1;
-					feet[0].event.height = feet[0].event.width;
+				// send event
+				fire_touches(&feet[0].event, 1);
+				continue;
+			}
+			else {
 
-					// check previous event
-					switch (feet[0].event.type) {
-					case DRS_UP:
+				switch (feet[0].event.type) {
+				case DRS_DOWN:
+				case DRS_MOVE:
 
-						// generate down event
-						feet[0].event.type = DRS_DOWN;
-						break;
-
-					case DRS_DOWN:
-					case DRS_MOVE:
-
-						// generate move event
-						feet[0].event.type = DRS_MOVE;
-						break;
-
-					default:
-						break;
-					}
-
-					// send event
+					// generate up event
+					feet[0].event.type = DRS_UP;
 					fire_touches(&feet[0].event, 1);
-					continue;
+					break;
+
+				case DRS_UP:
+				default:
+					break;
 				}
-				else {
-
-					switch (feet[0].event.type) {
-					case DRS_DOWN:
-					case DRS_MOVE:
-
-						// generate up event
-						feet[0].event.type = DRS_UP;
-						fire_touches(&feet[0].event, 1);
-						break;
-
-					case DRS_UP:
-					default:
-						break;
-					}
-				}
-				
-				// slow down
-				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			}
-			kinectStarted = false;
-			return nullptr;
-			});
-		t.detach();
-	}
+		// left foot
+			if (feet[1].touching)
+			{
+				feet[1].id = 1;
+				feet[1].index = 1;
+				feet[1].event.id = feet[1].id;
+				feet[1].event.width = 0.1;
+				feet[1].event.height = feet[1].event.width;
+				// check previous event
+				switch (feet[1].event.type) {
+				case DRS_UP:
+
+					// generate down event
+					feet[1].event.type = DRS_DOWN;
+					break;
+
+				case DRS_DOWN:
+				case DRS_MOVE:
+
+					// generate move event
+					feet[1].event.type = DRS_MOVE;
+					break;
+
+				default:
+					break;
+				}
+
+				// send event
+				fire_touches(&feet[1].event, 1);
+				continue;
+			}
+			else {
+
+				switch (feet[1].event.type) {
+				case DRS_DOWN:
+				case DRS_MOVE:
+
+					// generate up event
+					feet[1].event.type = DRS_UP;
+					fire_touches(&feet[1].event, 1);
+					break;
+
+				case DRS_UP:
+				default:
+					break;
+				}
+			}
+			// right foot
+			if (feet[2].touching)
+			{
+				feet[2].id = 2;
+				feet[2].index = 2;
+				feet[2].event.id = feet[2].id;
+				feet[2].event.width = 0.1;
+				feet[2].event.height = feet[2].event.width;
+				// check previous event
+				switch (feet[2].event.type) {
+				case DRS_UP:
+
+					// generate down event
+					feet[2].event.type = DRS_DOWN;
+					break;
+
+				case DRS_DOWN:
+				case DRS_MOVE:
+
+					// generate move event
+					feet[2].event.type = DRS_MOVE;
+					break;
+
+				default:
+					break;
+				}
+
+				// send event
+				fire_touches(&feet[2].event, 1);
+				continue;
+			}
+			else { // levitating
+
+				switch (feet[2].event.type) {
+				case DRS_DOWN:
+				case DRS_MOVE:
+
+					// generate up event
+					feet[2].event.type = DRS_UP;
+					fire_touches(&feet[2].event, 1);
+					break;
+
+				case DRS_UP:
+				default:
+					break;
+				}
+			}
+
+
+			// slow down
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		}
+		kinectStarted = false;
+		return nullptr;
+		});
+	t.detach();
 
 }
 
@@ -444,7 +455,8 @@ void hookDancepad() {
 	MH_CreateHookApi(L"TouchSDKDll.dll", "?InitTouch@TouchSDK@@QEAAHPEAU_DeviceInfo@@HP6AXU2@PEBU_TouchPointData@@HHPEBX@ZP6AX1_N3@ZPEAX@Z", TouchSDK_InitTouch, NULL);
 
 	MH_EnableHook(MH_ALL_HOOKS);
-	CreateThread(NULL, 0, depthrushNamedPipeServer, NULL, 0, NULL);
+	
 
-	start_kinect();
+	startInputSpam(); // spams input to the game 
+	pollKinect();
 }
