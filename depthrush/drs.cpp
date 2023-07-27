@@ -245,8 +245,8 @@ void pollKinect() {
 					Vector4 rightLegPos = skeletonFrame.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_ANKLE_RIGHT];
 
 					// print the coordinates of both legs
-					std::cout << "Left Leg: X = " << leftLegPos.x << ", Y = " << leftLegPos.y << ", Z = " << leftLegPos.z << std::endl;
-					std::cout << "Right Leg: X = " << rightLegPos.x << ", Y = " << rightLegPos.y << ", Z = " << rightLegPos.z << std::endl;
+					//std::cout << "Left Leg: X = " << leftLegPos.x << ", Y = " << leftLegPos.y << ", Z = " << leftLegPos.z << std::endl;
+					//std::cout << "Right Leg: X = " << rightLegPos.x << ", Y = " << rightLegPos.y << ", Z = " << rightLegPos.z << std::endl;
 
 					feet[1].event.x = leftLegPos.x;
 					feet[1].event.y = 0.5;
@@ -271,30 +271,42 @@ void startInputSpam() {
 
 		// temporarily hardcode both kinect feet to touching at size 0.1
 		feet[1].touching = true;
+		feet[1].id = 1;
+		feet[1].index = 1;
+		feet[1].event.id = feet[1].id;
+		feet[1].event.width = 0.1;
+		feet[1].event.height = feet[1].event.width;
 
 		feet[2].touching = true;
+		feet[2].id = 2;
+		feet[2].index = 2;
+		feet[2].event.id = feet[2].id;
+		feet[2].event.width = 0.1;
+		feet[2].event.height = feet[2].event.width;
+
+		// hardcode debug foot details
+		feet[0].id = 0;
+		feet[0].index = 0;
+
+		// update event details
+		feet[0].event.id = feet[0].id;
+		feet[0].event.x = 0.5;
+		feet[0].event.y = 0.5;
+		feet[0].event.width = 1;
+		feet[0].event.height = feet[0].event.width;
 
 		// main loop
 		while (true) {
 			// debug shift control to touch entire pad
 			if (GetKeyState(VK_SHIFT) & 0x8000)
 			{
-				// hardcode debug foot details
-				feet[0].id = 0;
-				feet[0].index = 0;
-
-				// update event details
-				feet[0].event.id = feet[0].id;
-				feet[0].event.x = 0.5;
-				feet[0].event.y = 0.5;
-				feet[0].event.width = 1;
-				feet[0].event.height = feet[0].event.width;
 
 				// check previous event
 				switch (feet[0].event.type) {
 				case DRS_UP:
 
 					// generate down event
+					
 					feet[0].event.type = DRS_DOWN;
 					break;
 
@@ -308,7 +320,6 @@ void startInputSpam() {
 				default:
 					break;
 				}
-
 				// send event
 				fire_touches(&feet[0].event, 1);
 				continue;
@@ -318,113 +329,83 @@ void startInputSpam() {
 				switch (feet[0].event.type) {
 				case DRS_DOWN:
 				case DRS_MOVE:
-
 					// generate up event
 					feet[0].event.type = DRS_UP;
 					fire_touches(&feet[0].event, 1);
 					break;
-
 				case DRS_UP:
 				default:
 					break;
 				}
 			}
-		// left foot
-			if (feet[1].touching)
+			if (true) // check if foot1 touch
 			{
-				feet[1].id = 1;
-				feet[1].index = 1;
-				feet[1].event.id = feet[1].id;
-				feet[1].event.width = 0.1;
-				feet[1].event.height = feet[1].event.width;
 				// check previous event
 				switch (feet[1].event.type) {
 				case DRS_UP:
-
 					// generate down event
 					feet[1].event.type = DRS_DOWN;
 					break;
-
 				case DRS_DOWN:
 				case DRS_MOVE:
-
 					// generate move event
+					//puts("foot1 is moving");
 					feet[1].event.type = DRS_MOVE;
 					break;
-
 				default:
 					break;
 				}
-
 				// send event
 				fire_touches(&feet[1].event, 1);
 				continue;
 			}
 			else {
-
 				switch (feet[1].event.type) {
 				case DRS_DOWN:
 				case DRS_MOVE:
-
 					// generate up event
 					feet[1].event.type = DRS_UP;
 					fire_touches(&feet[1].event, 1);
 					break;
-
 				case DRS_UP:
 				default:
 					break;
 				}
 			}
-			// right foot
-			if (feet[2].touching)
+			if (true) // check if foot2 touch
 			{
-				feet[2].id = 2;
-				feet[2].index = 2;
-				feet[2].event.id = feet[2].id;
-				feet[2].event.width = 0.1;
-				feet[2].event.height = feet[2].event.width;
+				puts("hello world??? why is this not executing");
 				// check previous event
 				switch (feet[2].event.type) {
 				case DRS_UP:
-
 					// generate down event
 					feet[2].event.type = DRS_DOWN;
 					break;
-
 				case DRS_DOWN:
 				case DRS_MOVE:
-
 					// generate move event
 					feet[2].event.type = DRS_MOVE;
 					break;
-
 				default:
 					break;
 				}
-
 				// send event
 				fire_touches(&feet[2].event, 1);
 				continue;
 			}
-			else { // levitating
-
+			else {
 				switch (feet[2].event.type) {
 				case DRS_DOWN:
 				case DRS_MOVE:
-
 					// generate up event
 					feet[2].event.type = DRS_UP;
 					fire_touches(&feet[2].event, 1);
 					break;
-
 				case DRS_UP:
 				default:
 					break;
 				}
 			}
-
-
 			// slow down
 			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		}
