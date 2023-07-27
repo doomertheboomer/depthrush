@@ -322,7 +322,6 @@ void startInputSpam() {
 				}
 				// send event
 				fire_touches(&feet[0].event, 1);
-				continue;
 			}
 			else {
 
@@ -338,7 +337,7 @@ void startInputSpam() {
 					break;
 				}
 			}
-			if (true) // check if foot1 touch
+			if (feet[1].touching) // check if foot1 touch
 			{
 				// check previous event
 				switch (feet[1].event.type) {
@@ -357,7 +356,6 @@ void startInputSpam() {
 				}
 				// send event
 				fire_touches(&feet[1].event, 1);
-				continue;
 			}
 			else {
 				switch (feet[1].event.type) {
@@ -372,9 +370,8 @@ void startInputSpam() {
 					break;
 				}
 			}
-			if (true) // check if foot2 touch
+			if (feet[2].touching) // check if foot2 touch
 			{
-				puts("hello world??? why is this not executing");
 				// check previous event
 				switch (feet[2].event.type) {
 				case DRS_UP:
@@ -391,7 +388,6 @@ void startInputSpam() {
 				}
 				// send event
 				fire_touches(&feet[2].event, 1);
-				continue;
 			}
 			else {
 				switch (feet[2].event.type) {
