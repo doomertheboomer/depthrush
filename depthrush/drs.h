@@ -8,10 +8,10 @@ enum DRS_TOUCH_TYPE {
 typedef struct drs_touch_t {
     int type = DRS_UP;
     int id = 0;
-    double x = 0.0; //x = pixelX/1920
-    double y = 0.0; //y = pixelY/1920
-    double width = 1; //width = pixelWidth/1920
-    double height = 1; //height = pixelHeight/1920
+    double x = 0.0; // x = pixelX/1920
+    double y = 0.0; // y = pixelY/1920
+    double width = 1; // width = pixelWidth/1920
+    double height = 1; // height = pixelHeight/1920
 };
 
 struct VRFoot {
@@ -21,20 +21,12 @@ struct VRFoot {
     float size_base = 0.05;
     float size_scale = 0.1;
     float height = 3;
-    //linalg::aliases::float4 rotation {0, 0, 0, 1};
     drs_touch_t event{};
-    //linalg::aliases::float3 to_world(linalg::aliases::float3 pos);
+    bool touching = false;
 };
 
-//extern char DRS_TAPELED[38 * 49][3];
-//extern linalg::aliases::float3 VR_SCALE;
-//extern linalg::aliases::float3 VR_OFFSET;
-//extern float VR_ROTATION;
-//extern VRFoot VR_FOOTS[2];
-
-
-
 void fire_touches(drs_touch_t* events, size_t event_count);
+
 void start_kinect();
 
 void hookDancepad();

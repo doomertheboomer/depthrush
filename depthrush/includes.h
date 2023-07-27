@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>
+#include <Windowsx.h>
 #include <libloaderapi.h>
 #include <winnt.h>
 #include <iostream>

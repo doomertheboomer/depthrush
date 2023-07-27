@@ -6,7 +6,8 @@
 bool kinectRunning = false;
 bool kinectStarted = false;
 
-extern VRFoot VR_FOOTS[2];
+VRFoot feet[16];
+
 
 typedef struct {
     union {
@@ -158,6 +159,43 @@ inline DWORD scale_double_to_width(double val) {
 	return static_cast<DWORD>(val * 1696);
 }
 
+DWORD depthrushWritePort(HANDLE port, char data[], unsigned length)
+{
+	DWORD numWritten = 0;
+
+	OVERLAPPED ol = { 0, 0, 0, 0, NULL };
+	ol.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+
+	BOOL status = WriteFile(port, data, length, &numWritten, &ol);
+	DWORD xferBytes = 0;
+
+	if (!status)
+	{
+		switch (GetLastError())
+		{
+		case ERROR_SUCCESS:
+			break;
+		case ERROR_IO_PENDING:
+			// Wait for 16ms
+			if (WaitForSingleObject(ol.hEvent, 16) == WAIT_OBJECT_0)
+			{
+				status = GetOverlappedResult(port, &ol, &xferBytes, FALSE);
+			}
+			else
+			{
+				CancelIo(port);
+			}
+			break;
+		}
+	}
+
+	CloseHandle(ol.hEvent);
+
+	FlushFileBuffers(port);
+	return numWritten;
+}
+
+
 void fire_touches(drs_touch_t* events, size_t event_count) {
 
 	// check callback first
@@ -209,9 +247,107 @@ void fire_touches(drs_touch_t* events, size_t event_count) {
 	touch_callback(&dev, game_touches.get(), (int)event_count, 0, user_data);
 }
 
-VRFoot feet[11];
-unsigned long holdcounters[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-unsigned long releasecounters[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+DWORD depthrushTouchThread(HANDLE port)
+{
+	char fileBuf[32];
+	puts("starting serial touch thread");
+
+	DWORD times = 0;
+
+	for (;;)
+	{
+		DWORD bytesRead = 0;
+		memset(fileBuf, 0, 32);
+
+		OVERLAPPED ol = { 0, 0, 0, 0, NULL };
+		BOOL ret = 0;
+		ol.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+
+		BOOL rfResult = ReadFile(port, fileBuf, 32, &bytesRead, &ol);
+		DWORD xferBytes = 0;
+
+		if (!rfResult)
+		{
+			switch (GetLastError())
+			{
+			case ERROR_SUCCESS:
+				break;
+			case ERROR_IO_PENDING:
+				// Wait for 16ms
+				if (WaitForSingleObject(ol.hEvent, 16) == WAIT_OBJECT_0)
+				{
+					rfResult = GetOverlappedResult(port, &ol, &xferBytes, FALSE);
+				}
+				else
+				{
+					CancelIo(port);
+				}
+				break;
+			}
+		}
+
+		CloseHandle(ol.hEvent);
+
+		if (xferBytes > 0)
+		{
+			printf("IN: xferred %d bytes\n", xferBytes);
+		}
+
+		if (bytesRead > 0)
+		{
+			printf("Read %d bytes: ", bytesRead);
+			for (unsigned x = 0; x < bytesRead; x++)
+			{
+				printf("%02X ", fileBuf[x]);
+			}
+			printf("\n");
+
+			BOOL packetRecognised = FALSE;
+
+			if (!packetRecognised)
+			{
+				puts("unknown packet, responding with OK");
+				depthrushWritePort(port, (char*)"1", 1);
+			}
+		}
+		Sleep(16);
+	}
+}
+
+DWORD depthrushNamedPipeServer(LPVOID _)
+{
+	puts("init depthrush pipe server");
+
+	HANDLE pipe = CreateNamedPipeW(
+		L"\\\\.\\pipe\\depthrush-api",
+		PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
+		PIPE_TYPE_BYTE | PIPE_WAIT,
+		PIPE_UNLIMITED_INSTANCES,
+		255,
+		255,
+		25,
+		NULL
+	);
+
+	if (!pipe)
+	{
+		puts("named pipe creation failed!");
+		return 1;
+	}
+
+	BOOL connected = ConnectNamedPipe(pipe, NULL) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
+
+	if (connected)
+	{
+	puts("client connection established, spawning thread");
+
+	DWORD tid = 0;
+	CreateThread(NULL, 0, depthrushTouchThread, pipe, 0, &tid);
+	printf("thread spawned, tid=%d\n", tid);
+	}
+
+	return 0;
+}
 
 void start_kinect() {
 
@@ -308,6 +444,7 @@ void hookDancepad() {
 	MH_CreateHookApi(L"TouchSDKDll.dll", "?InitTouch@TouchSDK@@QEAAHPEAU_DeviceInfo@@HP6AXU2@PEBU_TouchPointData@@HHPEBX@ZP6AX1_N3@ZPEAX@Z", TouchSDK_InitTouch, NULL);
 
 	MH_EnableHook(MH_ALL_HOOKS);
+	CreateThread(NULL, 0, depthrushNamedPipeServer, NULL, 0, NULL);
 
 	start_kinect();
 }

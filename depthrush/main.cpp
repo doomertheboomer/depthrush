@@ -23,30 +23,13 @@ static int returnFalse() {
 }
 
 
-bool init = false;
 
-/*
-DWORD WINAPI MainThread(LPVOID lpReserved)
-{
-	bool init_hook = false;
-	do
-	{
-		
-	} while (!init_hook);
-	return TRUE;
-}
-*/
 
 BOOL WINAPI DllMain(HMODULE hMod, DWORD dwReason, LPVOID lpReserved)
 {
-	switch (dwReason)
-	{
-	case DLL_PROCESS_ATTACH:
-		DisableThreadLibraryCalls(hMod);
-		imageBase = (uintptr_t)GetModuleHandleA(0);
-		hookDancepad();
+	DisableThreadLibraryCalls(hMod);
+	imageBase = (uintptr_t)GetModuleHandleA(0);
 
-		break;
-	}
-	return TRUE;
+	hookDancepad(); // drs.cpp
+	return true;
 }
