@@ -72,12 +72,13 @@ int kinectTest(float xGrad, float xOffset, float yGrad, float yOffset, float zGr
 
 		// check for stepping
 		float errorMargin = 0.05;
+		
 		if (fixedLeft > (fixedRight + errorMargin)) {
 			rightTouch = true;
 			leftTouch = false;
 			// std::cout << "right step\n";
 		}
-		else if (fixedLeft > (fixedRight + errorMargin)) {
+		else if (fixedRight > (fixedLeft + errorMargin)) {
 			leftTouch = true;
 			rightTouch = false;
 			// std::cout << "left step \n";
@@ -87,7 +88,7 @@ int kinectTest(float xGrad, float xOffset, float yGrad, float yOffset, float zGr
 			rightTouch = true;
 			// std::cout << "both step\n";
 		}
-		/*
+		
 		// print feet
 		for (int i = 0; i < width; i++) {
 			if ((i <= (toolLeft + toolWidth)) && (i >= (toolLeft - toolWidth)) && leftTouch) {
@@ -100,8 +101,8 @@ int kinectTest(float xGrad, float xOffset, float yGrad, float yOffset, float zGr
 				std::cout << " ";
 			}
 		}
-		*/
-		std::cout << std::to_string(fixedLeft) << " " << std::to_string(fixedRight) << std::endl;
+		
+		// std::cout << std::to_string(fixedLeft) << " " << std::to_string(fixedRight) << std::endl;
 	}
 
 	// Clean up and exit
