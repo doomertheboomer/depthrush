@@ -22,8 +22,42 @@ int calibration() {
 
 	// start calibration application
 	std::thread calibrateMenu([] {
-		std::cout << std::to_string(leftLegPos.x);
+		std::cout << "Starting calibration... Make sure your kinect is pointed straight ahead at you!\n";
+
+		// X calibration
+		std::cout << "Please place your left foot on the left side of the pad for 5 seconds.\n";
+		Sleep(5000);
+		float xMin = leftLegPos.x;
+		std::cout << "Left side recorded.\n";
+		std::cout << "Please place your right foot on the right side of the pad for 5 seconds.\n";
+		Sleep(5000);
+		float xMax = rightLegPos.x;
+		std::cout << "Right side recorded.\n";
+		float xGrad = (1 - 0) / (xMax - xMin);
+		float xOffset = -(xGrad * xMin);
+
+		// Y and Z calibration
+
+		// Z calibration
+		std::cout << "Please place your left foot at the front of the pad for 5 seconds.\n";
+		Sleep(5000);
+		float zMin = leftLegPos.z;
+		float yMin = leftLegPos.y;
+		std::cout << "Front recorded.\n";
+		std::cout << "Please place your left foot at the back of the pad for 5 seconds.\n";
+		Sleep(5000);
+		float zMax = leftLegPos.z;
+		float yMax = leftLegPos.y;
+		std::cout << "Back recorded.\n";
+		float zGrad = (1 - 0) / (zMax - zMin);
+		float zOffset = -(zGrad * zMin);
+		
+		//Y calibration
+		float yGrad = (yMax - yMin) / (zMax - zMin);
+		float yOffset = (yMin - yGrad * zMin);
 		});
+
+
 	calibrateMenu.detach();
 
 	// main loop to read and process skeleton data
