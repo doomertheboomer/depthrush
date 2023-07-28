@@ -5,6 +5,8 @@ VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "depthrush", "depthrush\depthrush.vcxproj", "{04B17470-CB82-4724-904B-25445926AB86}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "depthrushConfig", "depthrushConfig\depthrushConfig.vcxproj", "{AF89F70A-7F60-4B1C-9532-CE7BBD02EA56}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{04B17470-CB82-4724-904B-25445926AB86}.Release|x64.Build.0 = Release|x64
 		{04B17470-CB82-4724-904B-25445926AB86}.Release|x86.ActiveCfg = Release|Win32
 		{04B17470-CB82-4724-904B-25445926AB86}.Release|x86.Build.0 = Release|Win32
+		{AF89F70A-7F60-4B1C-9532-CE7BBD02EA56}.Debug|x64.ActiveCfg = Debug|x64
+		{AF89F70A-7F60-4B1C-9532-CE7BBD02EA56}.Debug|x64.Build.0 = Debug|x64
+		{AF89F70A-7F60-4B1C-9532-CE7BBD02EA56}.Debug|x86.ActiveCfg = Debug|Win32
+		{AF89F70A-7F60-4B1C-9532-CE7BBD02EA56}.Debug|x86.Build.0 = Debug|Win32
+		{AF89F70A-7F60-4B1C-9532-CE7BBD02EA56}.Release|x64.ActiveCfg = Release|x64
+		{AF89F70A-7F60-4B1C-9532-CE7BBD02EA56}.Release|x64.Build.0 = Release|x64
+		{AF89F70A-7F60-4B1C-9532-CE7BBD02EA56}.Release|x86.ActiveCfg = Release|Win32
+		{AF89F70A-7F60-4B1C-9532-CE7BBD02EA56}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

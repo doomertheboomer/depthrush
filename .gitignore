@@ -1,5 +1,7 @@
 .vs/
 x64/
-depthrush/x64/
 Release/
+depthrush/x64/
 depthrush/Release/
+depthrushConfig/x64/
+depthrushConfig/Release/

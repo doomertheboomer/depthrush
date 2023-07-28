@@ -171,6 +171,7 @@
   <ItemGroup>
     <ClInclude Include="drs.h" />
     <ClInclude Include="includes.h" />
+    <ClInclude Include="ini.h" />
     <ClInclude Include="kiero\injector\assembly.hpp" />
     <ClInclude Include="kiero\injector\calling.hpp" />
     <ClInclude Include="kiero\injector\gvm\gvm.hpp" />

@@ -228,9 +228,27 @@ void pollKinect() {
 			return 1;
 		}
 
+		// load config from ini
+		std::cout << "Loading depthrush.ini\n";
+		mINI::INIFile file("depthrush.ini");
+		mINI::INIStructure ini;
+		file.read(ini);
+		std::string& readValue = ini["calibration"]["xGrad"];
+		float xGrad = std::stof(readValue);
+		readValue = ini["calibration"]["xOffset"];
+		float xOffset = std::stof(readValue);
+		readValue = ini["calibration"]["yGrad"];
+		float yGrad = std::stof(readValue);
+		readValue = ini["calibration"]["yOffset"];
+		float yOffset = std::stof(readValue);
+		readValue = ini["calibration"]["zGrad"];
+		float zGrad = std::stof(readValue);
+		readValue = ini["calibration"]["zOffset"];
+		float zOffset = std::stof(readValue);
+
 		// main loop to read and process skeleton data
 		NUI_SKELETON_FRAME skeletonFrame = { 0 };
-		float errorMargin = 0.02;
+		float errorMargin = 0.03;
 		while (true) {
 			// get the latest skeleton frame
 			hr = NuiSkeletonGetNextFrame(0, &skeletonFrame);
@@ -249,24 +267,30 @@ void pollKinect() {
 					//std::cout << "Left Leg: X = " << leftLegPos.x << ", Y = " << leftLegPos.y << ", Z = " << leftLegPos.z << std::endl;
 					//std::cout << "Right Leg: X = " << rightLegPos.x << ", Y = " << rightLegPos.y << ", Z = " << rightLegPos.z << std::endl;
 
-					feet[1].event.x = leftLegPos.x;
+					feet[1].event.x = xGrad * leftLegPos.x + xOffset;
 					feet[1].event.y = 0.5;
-					feet[2].event.x = rightLegPos.x;
+					feet[2].event.x = xGrad * rightLegPos.x + xOffset;
 					feet[2].event.y = 0.5;
 
+					// Fix feet height
+					float fixedLeft = leftLegPos.y - (yGrad * leftLegPos.z + yOffset);
+					float fixedRight = rightLegPos.y - (yGrad * rightLegPos.z + yOffset);
+
 					// check for stepping
-					if (leftLegPos.y > (rightLegPos.y + errorMargin)) {
+					if (fixedLeft > (fixedRight + errorMargin)) {
 						feet[2].touching = true;
 						feet[1].touching = false;
-
+						// std::cout << "right step\n";
 					}
-					else if (rightLegPos.y > (leftLegPos.y + errorMargin)) {
+					else if (fixedRight > (fixedLeft + errorMargin)) {
 						feet[1].touching = true;
 						feet[2].touching = false;
+						// std::cout << "left step \n";
 					}
 					else {
 						feet[1].touching = true;
 						feet[2].touching = true;
+						// std::cout << "both step\n";
 					}
 
 				}
