@@ -13,7 +13,7 @@ int main()
         return 0;
     }
     else if (choice == 2) {
-        std::cout << "okay 2";
+        kinectTest(1, 1, 1, 1, 1, 1);
         return 0;
     }
     else {

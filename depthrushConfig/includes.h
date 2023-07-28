@@ -5,3 +5,6 @@
 #include <thread>
 #include <string>
 #include "calibration.h"
+#include "kinectTest.h"
+
+

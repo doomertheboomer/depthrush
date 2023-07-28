@@ -1,6 +1,7 @@
 #include "includes.h"
 Vector4 leftLegPos = { 1.5F, 1.5F, 1.5F, 1.5F };
 Vector4 rightLegPos = { 1.5F, 1.5F, 1.5F, 1.5F };
+bool kinectScanning = true;
 
 int calibration() {
 	
@@ -55,6 +56,18 @@ int calibration() {
 		//Y calibration
 		float yGrad = (yMax - yMin) / (zMax - zMin);
 		float yOffset = (yMin - yGrad * zMin);
+
+
+		// Clean up and proceed to kinect test
+		kinectScanning = false;
+		std::cout << std::to_string(xGrad) << " ";
+		std::cout << std::to_string(xOffset) << " ";
+		std::cout << std::to_string(yGrad) << " ";
+		std::cout << std::to_string(yOffset) << " ";
+		std::cout << std::to_string(zGrad) << " ";
+		std::cout << std::to_string(zOffset) << "\n";
+		std::cout << "Proceeding to Kinect Preview..\n";
+		kinectTest(xGrad, xOffset, yGrad, yOffset, zGrad, zOffset);
 		});
 
 
@@ -62,7 +75,7 @@ int calibration() {
 
 	// main loop to read and process skeleton data
 	NUI_SKELETON_FRAME skeletonFrame = { 0 };
-	while (true) {
+	while (kinectScanning) {
 		// get the latest skeleton frame
 		hr = NuiSkeletonGetNextFrame(0, &skeletonFrame);
 		if (FAILED(hr)) {
@@ -82,5 +95,6 @@ int calibration() {
 	// Clean up and exit
 	NuiSkeletonTrackingDisable();
 	NuiShutdown();
+	std::this_thread::sleep_for(std::chrono::hours(1000));
 	return 0;
 }

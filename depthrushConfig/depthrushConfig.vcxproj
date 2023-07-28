@@ -134,10 +134,12 @@
   <ItemGroup>
     <ClCompile Include="calibration.cpp" />
     <ClCompile Include="depthrushConfig.cpp" />
+    <ClCompile Include="kinectTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="calibration.h" />
     <ClInclude Include="includes.h" />
+    <ClInclude Include="kinectTest.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
