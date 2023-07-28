@@ -9,6 +9,7 @@
 #include "kiero/minhook/include/MinHook.h"
 #include "kiero/injector/injector.hpp"
 #include "d3d9.h"
+#include "ini.h"
 #include "drs.h"
 
 typedef LRESULT(CALLBACK* WNDPROC)(HWND, UINT, WPARAM, LPARAM);

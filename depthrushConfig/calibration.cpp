@@ -60,12 +60,26 @@ int calibration() {
 
 		// Clean up and proceed to kinect test
 		kinectScanning = false;
+		std::cout << "Saving the following values to depthrush.ini...\n";
 		std::cout << std::to_string(xGrad) << " ";
 		std::cout << std::to_string(xOffset) << " ";
 		std::cout << std::to_string(yGrad) << " ";
 		std::cout << std::to_string(yOffset) << " ";
 		std::cout << std::to_string(zGrad) << " ";
 		std::cout << std::to_string(zOffset) << "\n";
+
+		// Save values
+		mINI::INIFile file("depthrush.ini");
+		mINI::INIStructure ini;
+		ini["calibration"]["xGrad"] = std::to_string(xGrad);
+		ini["calibration"]["xOffset"] = std::to_string(xOffset);
+		ini["calibration"]["yGrad"] = std::to_string(yGrad);
+		ini["calibration"]["yOffset"] = std::to_string(yOffset);
+		ini["calibration"]["zGrad"] = std::to_string(zGrad);
+		ini["calibration"]["zOffset"] = std::to_string(zOffset);
+		file.generate(ini);
+		std::cout << "Save complete.\n";
+
 		std::cout << "Proceeding to Kinect Preview..\n";
 		kinectTest(xGrad, xOffset, yGrad, yOffset, zGrad, zOffset);
 		});

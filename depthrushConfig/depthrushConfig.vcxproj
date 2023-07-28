@@ -139,6 +139,7 @@
   <ItemGroup>
     <ClInclude Include="calibration.h" />
     <ClInclude Include="includes.h" />
+    <ClInclude Include="ini.h" />
     <ClInclude Include="kinectTest.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

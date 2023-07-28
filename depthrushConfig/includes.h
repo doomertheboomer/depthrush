@@ -4,6 +4,7 @@
 #include <iostream>
 #include <thread>
 #include <string>
+#include "ini.h"
 #include "calibration.h"
 #include "kinectTest.h"
 
