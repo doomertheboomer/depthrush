@@ -268,9 +268,9 @@ void pollKinect() {
 					//std::cout << "Right Leg: X = " << rightLegPos.x << ", Y = " << rightLegPos.y << ", Z = " << rightLegPos.z << std::endl;
 
 					feet[1].event.x = xGrad * leftLegPos.x + xOffset;
-					feet[1].event.y = 0.5;
+					feet[1].event.y = zGrad * leftLegPos.z + zOffset;
 					feet[2].event.x = xGrad * rightLegPos.x + xOffset;
-					feet[2].event.y = 0.5;
+					feet[2].event.y = zGrad * rightLegPos.z + zOffset;
 
 					// Fix feet height
 					float fixedLeft = leftLegPos.y - (yGrad * leftLegPos.z + yOffset);
