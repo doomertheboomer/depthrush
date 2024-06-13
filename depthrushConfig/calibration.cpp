@@ -71,13 +71,25 @@ int calibration() {
 		// Save values
 		mINI::INIFile file("depthrush.ini");
 		mINI::INIStructure ini;
+
+		// Read the existing contents of the file
+		if (file.read(ini)) {
+			std::cout << "Existing file loaded.\n";
+		}
+		else {
+			std::cout << "File does not exist or failed to load, creating new.\n";
+		}
+
+		// Update the structure with new values
 		ini["calibration"]["xGrad"] = std::to_string(xGrad);
 		ini["calibration"]["xOffset"] = std::to_string(xOffset);
 		ini["calibration"]["yGrad"] = std::to_string(yGrad);
 		ini["calibration"]["yOffset"] = std::to_string(yOffset);
 		ini["calibration"]["zGrad"] = std::to_string(zGrad);
 		ini["calibration"]["zOffset"] = std::to_string(zOffset);
-		file.generate(ini);
+
+		// Write the updated structure back to the file
+		file.write(ini);
 		std::cout << "Save complete.\n";
 
 		std::cout << "Proceeding to Kinect Preview..\n";

@@ -656,6 +656,5 @@ inline memory_pointer_aslr  aslr_ptr(T p)
 
 
 
-
 } // namespace 
 
